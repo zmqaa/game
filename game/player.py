@@ -2,6 +2,7 @@
 
 import random
 
+from game import enemy
 from game.skill import Skill
 
 
@@ -22,6 +23,9 @@ class Player:
         self.skills = []
         self.mp = 50  # 魔法值
         self.max_mp = 50
+
+        self.status_effects = []  # 添加这一行来存储状态效果
+        self.gold = 100  # 初始金币
 
         # 初始技能
         self.learn_skill(Skill("重击", 15, "造成150%的攻击伤害", 1.5))
@@ -85,7 +89,7 @@ class Player:
             self.experience = 0
             self.hp += 20
             self.max_hp += 20
-            self.attack += 5
+            self.attack_power += 5
             self.defense += 2  # 每次升级增加2点防御力
             print(f"{self.name} 升级了！现在是等级 {self.level}！")
             print(f"{self.name} 的HP增加了20点，现在是 {self.hp}/{self.max_hp} HP。")
@@ -117,6 +121,9 @@ class Player:
 
     def attack_enemy(self, target):  # 攻击方法
         damage = random.randint(1, self.attack_power)
+        for item in self.inventory:
+            if item.effect == "weapon" and hasattr(item, "status_effect") and item.status_effect:
+                item.apply_effect(enemy)
         actual_damage = target.take_damage(damage)
         print(f"{self.name} 对 {target.name} 造成了 {actual_damage} 点伤害！")
 
@@ -126,3 +133,18 @@ class Player:
         if self.hp < 0:
             self.hp = 0
         return actual_damage
+
+    def apply_status_effect(self, effect):
+        """添加状态效果"""
+        self.status_effects.append(effect)
+        print(f"{self.name} 被施加了 {effect.name} 效果！")
+
+    def update_status_effects(self):
+        """更新所有状态效果"""
+        for effect in self.status_effects[:]:  # 创建副本以便在循环中安全移除
+            if effect.is_active:
+                effect.apply_effect(self)
+                effect.update()
+                if not effect.is_active:
+                    self.status_effects.remove(effect)
+                    print(f"{self.name} 的 {effect.name} 效果消失了。")

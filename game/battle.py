@@ -89,6 +89,13 @@ def battle(player, enemy):
             player.gain_experience(exp_reward)
             return True
 
+        # 更新玩家的状态效果
+        player.update_status_effects()
+
+        # 如果玩家还活着，更新敌人的状态效果
+        if player.is_alive():
+            enemy.update_status_effects()
+
         # 敌人回合
         if enemy.is_alive():
             enemy.attack_target(player)  # 使用新的方法名

@@ -2,7 +2,8 @@
 
 import random
 from game.enemy import Enemy
-from game.item import Weapon, Potion
+from game.item import Weapon, Potion, SPECIAL_WEAPONS
+
 
 def random_enemy():
     enemies = [
@@ -13,11 +14,15 @@ def random_enemy():
     return random.choice(enemies)
 
 def random_item():
+    # 添加特殊武器到可能的掉落物品中
     items = [
         Weapon("铁剑", 5),
-        Potion("治疗药水", 20)
+        Potion("治疗药水", 20),
+        SPECIAL_WEAPONS[0],  # 毒匕首
+        SPECIAL_WEAPONS[1]   # 火焰剑
     ]
-    return random.choice(items)
+    chances = [0.4, 0.4, 0.1, 0.1]  # 设置各物品的掉落概率
+    return random.choices(items, weights=chances)[0]
 
 def explore(player):
     print("你正在探索...")

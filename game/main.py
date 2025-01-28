@@ -2,7 +2,7 @@
 from game.player import Player
 from game.map import WorldMap, Area
 from game.data import (
-    MONSTERS,
+    enemies,
     AREAS,
     QUESTS,
     SKILLS,
@@ -10,6 +10,7 @@ from game.data import (
     get_area_data
 )
 from game.enemy import Enemy
+from game.shop import Shop
 from game.skill import Skill
 
 
@@ -27,17 +28,22 @@ def create_enemy(monster_name):
     return None
 
 
+# game/main.py
+
+from game.data.enemies import create_enemy
+
+
+def initialize_area_enemies(area_data):
+    """初始化区域的敌人"""
+    return [create_enemy(enemy_name) for enemy_name in area_data["enemies"]]
+
+
 def initialize_world():
-    """初始化游戏世界"""
     world_map = WorldMap()
 
-    # 创建并添加区域
+    # 初始化每个区域
     for area_name, area_data in AREAS.items():
-        # 为该区域创建敌人列表
-        enemies = [create_enemy(monster_name) for monster_name in area_data["enemies"]]
-        # 过滤掉None值（无效的怪物）
-        enemies = [enemy for enemy in enemies if enemy is not None]
-
+        enemies = initialize_area_enemies(area_data)
         area = Area(
             name=area_name,
             description=area_data["description"],
@@ -46,8 +52,7 @@ def initialize_world():
         )
         world_map.add_area(area)
 
-    # 连接区域
-    for area_name, area_data in AREAS.items():
+        # 设置区域连接
         for connected_area in area_data["connections"]:
             world_map.connect_areas(area_name, connected_area)
 
@@ -101,11 +106,12 @@ def main():
 
         print("\n可用命令:")
         print("1. 探索当前区域")
-        print("2. 移动到其他区域")
+        print("2. 地图")
         print("3. 查看背包")
         print("4. 查看任务")
         print("5. 查看技能")
         print("6. 退出游戏")
+        print("7. 访问商店")
 
         choice = input("\n请选择操作 (1-6): ")
 
@@ -172,9 +178,18 @@ def main():
             print("\n感谢游玩！再见！")
             break
 
+        elif choice == "7":
+            shop = Shop()
+            shop.show_items()
+            item_choice = input("\n选择要购买的物品 (0返回): ")
+            if item_choice != "0":
+                try:
+                    shop.buy_item(player, int(item_choice) - 1)
+                except ValueError:
+                    print("请输入有效的数字！")
+
         else:
             print("无效的选择！")
-
 
 if __name__ == "__main__":
     main()
