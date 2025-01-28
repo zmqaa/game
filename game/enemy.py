@@ -1,21 +1,26 @@
 # game/enemy.py
+import random
 
-from numpy import random
 class Enemy:
-    def __init__(self, name, hp, attack):
+    def __init__(self, name, hp, attack_power, defense=0, exp_reward=0):  # 这里也改为 attack_power
         self.name = name
         self.hp = hp
-        self.attack = attack
+        self.max_hp = hp
+        self.attack_power = attack_power  # 改名
+        self.defense = defense
+        self.exp_reward = exp_reward
 
     def is_alive(self):
         return self.hp > 0
 
     def take_damage(self, damage):
-        self.hp -= damage
+        actual_damage = max(1, damage - self.defense)
+        self.hp -= actual_damage
         if self.hp < 0:
             self.hp = 0
+        return actual_damage
 
-    def attack_player(self, player):
-        damage = random.randint(1, self.attack)
-        player.take_damage(damage)
-        print(f"{self.name} 对 {player.name} 造成了 {damage} 点伤害！")
+    def attack_target(self, target):  # 改名为 attack_target
+        damage = random.randint(1, self.attack_power)
+        actual_damage = target.take_damage(damage)
+        print(f"{self.name} 对 {target.name} 造成了 {actual_damage} 点伤害！")
